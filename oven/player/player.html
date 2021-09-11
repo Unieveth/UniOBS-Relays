@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player</title>
+    <script src="production/ovenplayer/ovenplayer.js"></script>
+</head>
+<body>
+<div id="player"></div>
+<script>
+        //Get Stream Name
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const stream = urlParams.get('stream')
+
+    const player = OvenPlayer.create("player", {
+        sources: [
+            {
+                "file": `ws://192.168.2.28:3333/cleanfeed/${stream}`,
+                "type": "webrtc"
+            }
+        ],
+        autoStart: false,
+        controls: true,
+        showBigPlayButton: true
+    });
+</script>
+<style>
+    body {
+        margin: 0;
+    }
+    #player {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .op-spinner {
+        display: none !important;
+    }
+</style>
+</body>
+</html>

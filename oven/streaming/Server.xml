@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Server version="8">
+    <Name>OvenMediaEngine</Name>
+    <!-- Host type (origin/edge) -->
+    <Type>origin</Type>
+    <!-- Specify IP address to bind (* means all IPs) -->
+    <IP>*</IP>
+
+    <!-- Settings for the ports to bind -->
+    <Bind>
+        <Providers>
+            <RTMP>
+                <Port>${env:OME_RTMP_PROV_PORT:1935}</Port>
+            </RTMP>
+            <MPEGTS>
+                <!--
+                        Listen on port 4000,4001,4004,4005
+                        This is just a demonstration to show that you can configure the port in several ways
+                -->
+                <Port>${env:OME_MPEGTS_PROV_PORT:4000-4003,4004,4005/udp}</Port>
+            </MPEGTS>
+            <SRT>
+                <Port>9999</Port>
+                 <WorkerCount>1</WorkerCount>
+            </SRT>
+        </Providers>
+
+        <Publishers>
+            <!-- The OVT is protocol for ORIGIN-EDGE -->
+            <OVT>
+                <Port>${env:OME_ORIGIN_PORT:9000}</Port>
+            </OVT>
+            <HLS>
+                <Port>${env:OME_HLS_STREAM_PORT:8080}</Port>
+                <!-- If you want to use TLS, specify the TLS port -->
+                <!-- <TLSPort>443</TLSPort> -->
+            </HLS>
+            <DASH>
+                <Port>${env:OME_DASH_STREAM_PORT:8080}</Port>
+                <!-- If you want to use TLS, specify the TLS port -->
+                <!-- <TLSPort>443</TLSPort> -->
+            </DASH>
+            <WebRTC>
+                <Signalling>
+                    <Port>${env:OME_SIGNALLING_PORT:3333}</Port>
+                    <!-- If you want to use TLS, specify the TLS port -->
+                    <!-- <TLSPort>3334</TLSPort> -->
+                </Signalling>
+                <IceCandidates>
+                    <IceCandidate>${env:OME_ICE_CANDIDATES:*:10006-10010/udp}</IceCandidate>
+                </IceCandidates>
+            </WebRTC>
+        </Publishers>
+
+        <Managers>
+            <API>
+                <Port>8081</Port>
+                <!-- If you need TLS support, please uncomment below:
+                <TLSPort>8082</TLSPort>
+                -->
+            </API>
+        </Managers>
+    </Bind>
+
+    <VirtualHosts>
+        <!--
+                You can include multiple XML files by doing the following:
+                <VirtualHost include="sites-enabled/*.xml" />
+        -->
+        <VirtualHost include="VHost*.xml"/>
+        <VirtualHost>
+            <Name>default</Name>
+
+            <!-- Settings for multi ip/domain and TLS -->
+            <Host>
+                <Names>
+                    <!-- Host names
+                            <Name>stream1.airensoft.com</Name>
+                            <Name>stream2.airensoft.com</Name>
+                            <Name>*.sub.airensoft.com</Name>
+                            <Name>192.168.0.1</Name>
+                    -->
+                    <Name>relay.unieveth.com</Name>
+                </Names>
+                <!--
+                <TLS>
+                        <CertPath>path/to/file.crt</CertPath>
+                        <KeyPath>path/to/file.key</KeyPath>
+                        <ChainCertPath>path/to/file.crt</ChainCertPath>
+                </TLS>
+                -->
+            </Host>
+
+            <!-- Settings for applications -->
+            <Applications>
+                <Application>
+                    <Name>cleanfeed</Name>
+                    <!-- Application type (live/vod) -->
+                    <Type>live</Type>
+                    <OutputProfiles>
+                        <OutputProfile>
+                            <Name>for_stream</Name>
+                            <OutputStreamName>${OriginStreamName}</OutputStreamName>
+                            <Encodes>
+                                <Audio>
+                                    <Bypass>true</Bypass>
+                                </Audio>
+                                <Video>
+                                    <Codec>h264</Codec>
+                                    <Width>1920</Width>
+                                    <Height>1080</Height>
+                                    <Bitrate>7000000</Bitrate>
+                                    <Framerate>60.0</Framerate>
+<!--                                    <Bypass>true</Bypass>-->
+                                </Video>
+                                <Audio>
+                                    <Codec>opus</Codec>
+                                    <Bitrate>128000</Bitrate>
+                                    <Samplerate>48000</Samplerate>
+                                    <Channel>2</Channel>
+                                </Audio>
+                            </Encodes>
+                        </OutputProfile>
+                        <OutputProfile>
+                            <Name>for_stream</Name>
+                            <OutputStreamName>${OriginStreamName}_ttv</OutputStreamName>
+                            <Encodes>
+                                <Audio>
+                                    <Bypass>true</Bypass>
+                                </Audio>
+                                <Video>
+                                    <Codec>h264</Codec>
+                                    <Width>1920</Width>
+                                    <Height>1080</Height>
+                                    <Bitrate>6000000</Bitrate>
+                                    <Framerate>60.0</Framerate>
+                                    <!--                                    <Bypass>true</Bypass>-->
+                                </Video>
+                                <Audio>
+                                    <Codec>opus</Codec>
+                                    <Bitrate>128000</Bitrate>
+                                    <Samplerate>48000</Samplerate>
+                                    <Channel>2</Channel>
+                                </Audio>
+                            </Encodes>
+                        </OutputProfile>
+                        <OutputProfile>
+                            <Name>raw</Name>
+                            <OutputStreamName>${OriginStreamName}_raw</OutputStreamName>
+                            <Encodes>
+                                <Audio>
+                                    <Bypass>true</Bypass>
+                                </Audio>
+                                <Video>
+<!--                                    <Codec>h264</Codec>-->
+<!--                                    <Width>1920</Width>-->
+<!--                                    <Height>1080</Height>-->
+<!--                                    <Bitrate>6000000</Bitrate>-->
+<!--                                    <Framerate>60.0</Framerate>-->
+                                    <Bypass>true</Bypass>
+                                </Video>
+                                <Audio  >
+                                    <Codec>opus</Codec>
+                                    <Bitrate>128000</Bitrate>
+                                    <Samplerate>48000</Samplerate>
+                                    <Channel>2</Channel>
+                                </Audio>
+                            </Encodes>
+                        </OutputProfile>
+                    </OutputProfiles>
+                    <Providers>
+                        <OVT/>
+                        <RTMP/>
+                        <RTSPPull/>
+                        <SRT/>
+                        <MPEGTS>
+                            <StreamMap>
+                                <!--
+                                        Set the stream name of the client connected to the port to "stream_${Port}"
+                                        For example, if a client connets to port 4000, OME creates a "stream_4000" stream
+                                -->
+                                <Stream>
+                                    <Name>stream_${Port}</Name>
+                                    <Port>4000,4001-4004</Port>
+                                </Stream>
+                                <Stream>
+                                    <Name>stream_4005</Name>
+                                    <Port>4005</Port>
+                                </Stream>
+                            </StreamMap>
+                        </MPEGTS>
+                    </Providers>
+                    <Publishers>
+                        <SessionLoadBalancingThreadCount>8</SessionLoadBalancingThreadCount>
+                        <OVT/>
+                        <WebRTC>
+                            <Timeout>30000</Timeout>
+                        </WebRTC>
+                        <HLS>
+                            <SegmentDuration>5</SegmentDuration>
+                            <SegmentCount>3</SegmentCount>
+                            <CrossDomains>
+                                <Url>*</Url>
+                            </CrossDomains>
+                        </HLS>
+                        <DASH>
+                            <SegmentDuration>5</SegmentDuration>
+                            <SegmentCount>3</SegmentCount>
+                            <CrossDomains>
+                                <Url>*</Url>
+                            </CrossDomains>
+                        </DASH>
+                        <LLDASH>
+                            <SegmentDuration>5</SegmentDuration>
+                            <CrossDomains>
+                                <Url>*</Url>
+                            </CrossDomains>
+                        </LLDASH>
+                        <RTMPPush>
+                        </RTMPPush>
+                    </Publishers>
+                </Application>
+            </Applications>
+        </VirtualHost>
+    </VirtualHosts>
+
+    <Managers>
+        <Host>
+            <Names>
+                <Name>relay.unieveth.com</Name>
+            </Names>
+            <!--
+                If you want to set up TLS, set it up by referring to the following:
+            <TLS>
+                <CertPath>airensoft_com.crt</CertPath>
+                <KeyPath>airensoft_com.key</KeyPath>
+                <ChainCertPath>airensoft_com_chain.crt</ChainCertPath>
+            </TLS>
+            -->
+        </Host>
+        <API>
+            <AccessToken>ysyhEyFf78zRtmzNbBmTqx4rjY79ngNLyQtAqsoJ</AccessToken>
+        </API>
+    </Managers>
+</Server>
